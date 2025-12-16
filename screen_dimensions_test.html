@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Screen & Rendering Test Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        main {
+            padding: 30px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .test-section:hover {
+            border-color: #4facfe;
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        .status-pass {
+            background: #27ae60;
+        }
+
+        .status-fail {
+            background: #e74c3c;
+        }
+
+        .status-pending {
+            background: #f39c12;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .test-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .test-item.pass {
+            border-left-color: #27ae60;
+        }
+
+        .test-item.fail {
+            border-left-color: #e74c3c;
+        }
+
+        .test-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .test-value {
+            font-family: 'Courier New', monospace;
+            background: #ecf0f1;
+            padding: 5px 8px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .summary h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .filter-test {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .filter-test.pass {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .filter-test.fail {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .canvas-test {
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            }
+            
+            .test-section {
+                background: #34495e;
+                color: #ecf0f1;
+                border-color: #4a5f7a;
+            }
+            
+            .test-item {
+                background: #2c3e50;
+                color: #ecf0f1;
+            }
+            
+            .test-value {
+                background: #4a5f7a;
+                color: #ecf0f1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖥️ Comprehensive Screen & Rendering Test Suite</h1>
+            <p class="subtitle">Testing screen dimensions, rendering capabilities, and modern web standards compliance</p>
+        </header>
+
+        <main>
+            <section class="test-section">
+                <h2 class="section-title">
+                    <span class="status-indicator status-pending" id="screen-status"></span>
+                    Screen Dimensions Test
+                </h2>
+                <div class="test-grid">
+                    <div class="test-item" id="screen-width-test">
+                        <div class="test-label">Screen Width</div>
+                        <div class="test-value" id="screen-width">Testing...</div>
+                    </div>
+                    <div class="test-item" id="screen-height-test">
+                        <div class="test-label">Screen Height</div>
+                        <div class="test-value" id="screen-height">Testing...</div>
+                    </div>
+                    <div class="test-item" id="screen-avail-width-test">
+                        <div class="test-label">Available Width</div>
+                        <div class="test-value" id="screen-avail-width">Testing...</div>
+                    </div>
+                    <div class="test-item" id="screen-avail-height-test">
+                        <div class="test-label">Available Height</div>
+                        <div class="test-value" id="screen-avail-height">Testing...</div>
+                    </div>
+                    <div class="test-item" id="screen-color-depth-test">
+                        <div class="test-label">Color Depth</div>
+                        <div class="test-value" id="screen-color-depth">Testing...</div>
+                    </div>
+                    <div class="test-item" id="screen-pixel-depth-test">
+                        <div class="test-label">Pixel Depth</div>
+                        <div class="test-value" id="screen-pixel-depth">Testing...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="test-section">
+                <h2 class="section-title">
+                    <span class="status-indicator status-pending" id="window-status"></span>
+                    Window Dimensions Test
+                </h2>
+                <div class="test-grid">
+                    <div class="test-item" id="window-inner-width-test">
+                        <div class="test-label">Window Inner Width</div>
+                        <div class="test-value" id="window-inner-width">Testing...</div>
+                    </div>
+                    <div class="test-item" id="window-inner-height-test">
+                        <div class="test-label">Window Inner Height</div>
+                        <div class="test-value" id="window-inner-height">Testing...</div>
+                    </div>
+                    <div class="test-item" id="window-outer-width-test">
+                        <div class="test-label">Window Outer Width</div>
+                        <div class="test-value" id="window-outer-width">Testing...</div>
+                    </div>
+                    <div class="test-item" id="window-outer-height-test">
+                        <div class="test-label">Window Outer Height</div>
+                        <div class="test-value" id="window-outer-height">Testing...</div>
+                    </div>
+                    <div class="test-item" id="device-pixel-ratio-test">
+                        <div class="test-label">Device Pixel Ratio</div>
+                        <div class="test-value" id="device-pixel-ratio">Testing...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="test-section">
+                <h2 class="section-title">
+                    <span class="status-indicator status-pending" id="rendering-status"></span>
+                    Rendering Capabilities Test
+                </h2>
+                <div class="test-grid">
+                    <div class="test-item" id="canvas-test">
+                        <div class="test-label">Canvas Support</div>
+                        <div class="test-value" id="canvas-support">Testing...</div>
+                        <canvas id="test-canvas" class="canvas-test hidden" width="200" height="100"></canvas>
+                    </div>
+                    <div class="test-item" id="webgl-test">
+                        <div class="test-label">WebGL Support</div>
+                        <div class="test-value" id="webgl-support">Testing...</div>
+                    </div>
+                    <div class="test-item" id="webgl2-test">
+                        <div class="test-label">WebGL2 Support</div>
+                        <div class="test-value" id="webgl2-support">Testing...</div>
+                    </div>
+                    <div class="test-item" id="css-filters-test">
+                        <div class="test-label">CSS Filters Support</div>
+                        <div class="test-value" id="css-filters-support">Testing...</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="test-section">
+                <h2 class="section-title">
+                    <span class="status-indicator status-pending" id="standards-status"></span>
+                    Modern Web Standards & Filters
+                </h2>
+                
+                <div class="filter-test" id="https-test">
+                    <strong>HTTPS Protocol:</strong> <span id="https-result">Testing...</span>
+                </div>
+                
+                <div class="filter-test" id="cors-test">
+                    <strong>CORS Support:</strong> <span id="cors-result">Testing...</span>
+                </div>
+                
+                <div class="filter-test" id="csp-test">
+                    <strong>Content Security Policy:</strong> <span id="csp-result">Testing...</span>
+                </div>
+                
+                <div class="filter-test" id="service-worker-test">
+                    <strong>Service Worker Support:</strong> <span id="service-worker-result">Testing...</span>
+                </div>
+                
+                <div class="filter-test" id="webp-test">
+                    <strong>WebP Image Support:</strong> <span id="webp-result">Testing...</span>
+                </div>
+                
+                <div class="filter-test" id="avif-test">
+                    <strong>AVIF Image Support:</strong> <span id="avif-result">Testing...</span>
+                </div>
+                
+                <div class="filter-test" id="webauthn-test">
+                    <strong>WebAuthn Support:</strong> <span id="webauthn-result">Testing...</span>
+                </div>
+                
+                <div class="filter-test" id="permissions-test">
+                    <strong>Permissions API Support:</strong> <span id="permissions-result">Testing...</span>
+                </div>
+            </section>
+
+            <section class="test-section">
+                <h2 class="section-title">
+                    <span class="status-indicator status-pending" id="fingerprint-status"></span>
+                    Advanced Fingerprinting Detection
+                </h2>
+                <div class="test-grid">
+                    <div class="test-item" id="fingerprint-consistency-test">
+                        <div class="test-label">Screen Size Consistency</div>
+                        <div class="test-value" id="fingerprint-consistency">Testing...</div>
+                    </div>
+                    <div class="test-item" id="fingerprint-uniqueness-test">
+                        <div class="test-label">Screen Fingerprint Uniqueness</div>
+                        <div class="test-value" id="fingerprint-uniqueness">Testing...</div>
+                    </div>
+                    <div class="test-item" id="fingerprint-entropy-test">
+                        <div class="test-label">Screen Entropy Analysis</div>
+                        <div class="test-value" id="fingerprint-entropy">Testing...</div>
+                    </div>
+                    <div class="test-item" id="fingerprint-rotation-test">
+                        <div class="test-label">Screen Rotation Detection</div>
+                        <div class="test-value" id="fingerprint-rotation">Testing...</div>
+                    </div>
+                    <div class="test-item" id="fingerprint-dpr-test">
+                        <div class="test-label">Device Pixel Ratio Analysis</div>
+                        <div class="test-value" id="fingerprint-dpr">Testing...</div>
+                    </div>
+                    <div class="test-item" id="fingerprint-color-test">
+                        <div class="test-label">Color Depth Fingerprint</div>
+                        <div class="test-value" id="fingerprint-color">Testing...</div>
+                    </div>
+                    <div class="test-item" id="timezone-test">
+                        <div class="test-label">Timezone Detection</div>
+                        <div class="test-value" id="timezone-result">Testing...</div>
+                    </div>
+                    <div class="test-item" id="language-test">
+                        <div class="test-label">Language Detection</div>
+                        <div class="test-value" id="language-result">Testing...</div>
+                    </div>
+                    <div class="test-item" id="platform-test">
+                        <div class="test-label">Platform Detection</div>
+                        <div class="test-value" id="platform-result">Testing...</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="summary">
+                <h2>📊 Test Results Summary</h2>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-tests">0</span>
+                        <span class="stat-label">Total Tests</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="passed-tests">0</span>
+                        <span class="stat-label">Passed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="failed-tests">0</span>
+                        <span class="stat-label">Failed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="overall-status">⏳</span>
+                        <span class="stat-label">Overall Status</span>
+                    </div>
+                </div>
+                <button onclick="runAllTests()">🔄 Run All Tests Again</button>
+                <button onclick="exportResults()">📥 Export Results</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0,
+            details: {}
+        };
+
+        // Screen Dimensions Tests
+        function testScreenDimensions() {
+            const tests = [
+                { id: 'screen-width', property: 'screen.width', element: 'screen-width-test' },
+                { id: 'screen-height', property: 'screen.height', element: 'screen-height-test' },
+                { id: 'screen-avail-width', property: 'screen.availWidth', element: 'screen-avail-width-test' },
+                { id: 'screen-avail-height', property: 'screen.availHeight', element: 'screen-avail-height-test' },
+                { id: 'screen-color-depth', property: 'screen.colorDepth', element: 'screen-color-depth-test' },
+                { id: 'screen-pixel-depth', property: 'screen.pixelDepth', element: 'screen-pixel-depth-test' }
+            ];
+
+            tests.forEach(test => {
+                try {
+                    const value = eval(test.property);
+                    document.getElementById(test.id).textContent = value;
+                    
+                    // Check if values are reasonable
+                    const isValid = value > 0 && (test.id.includes('depth') ? value >= 8 : value >= 100);
+                    
+                    if (isValid) {
+                        document.getElementById(test.element).classList.add('pass');
+                        testResults.passed++;
+                    } else {
+                        document.getElementById(test.element).classList.add('fail');
+                        testResults.failed++;
+                    }
+                    
+                    testResults.details[test.id] = { value, passed: isValid };
+                } catch (error) {
+                    document.getElementById(test.id).textContent = 'Error: ' + error.message;
+                    document.getElementById(test.element).classList.add('fail');
+                    testResults.failed++;
+                    testResults.details[test.id] = { value: 'Error', passed: false };
+                }
+                testResults.total++;
+            });
+
+            updateSectionStatus('screen-status', testResults.passed > testResults.failed);
+        }
+
+        // Window Dimensions Tests
+        function testWindowDimensions() {
+            const tests = [
+                { id: 'window-inner-width', property: 'window.innerWidth', element: 'window-inner-width-test' },
+                { id: 'window-inner-height', property: 'window.innerHeight', element: 'window-inner-height-test' },
+                { id: 'window-outer-width', property: 'window.outerWidth', element: 'window-outer-width-test' },
+                { id: 'window-outer-height', property: 'window.outerHeight', element: 'window-outer-height-test' },
+                { id: 'device-pixel-ratio', property: 'window.devicePixelRatio', element: 'device-pixel-ratio-test' }
+            ];
+
+            tests.forEach(test => {
+                try {
+                    const value = eval(test.property);
+                    document.getElementById(test.id).textContent = value;
+                    
+                    const isValid = value > 0 && (test.id.includes('ratio') ? value >= 0.5 : value >= 100);
+                    
+                    if (isValid) {
+                        document.getElementById(test.element).classList.add('pass');
+                        testResults.passed++;
+                    } else {
+                        document.getElementById(test.element).classList.add('fail');
+                        testResults.failed++;
+                    }
+                    
+                    testResults.details[test.id] = { value, passed: isValid };
+                } catch (error) {
+                    document.getElementById(test.id).textContent = 'Error: ' + error.message;
+                    document.getElementById(test.element).classList.add('fail');
+                    testResults.failed++;
+                    testResults.details[test.id] = { value: 'Error', passed: false };
+                }
+                testResults.total++;
+            });
+
+            updateSectionStatus('window-status', testResults.passed > testResults.failed);
+        }
+
+        // Rendering Capabilities Tests
+        function testRenderingCapabilities() {
+            // Canvas Test
+            try {
+                const canvas = document.getElementById('test-canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#4facfe';
+                ctx.fillRect(0, 0, 200, 100);
+                ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.fillText('Canvas Test', 50, 60);
+                
+                document.getElementById('canvas-support').textContent = 'Supported';
+                document.getElementById('canvas-test').classList.add('pass');
+                document.getElementById('test-canvas').classList.remove('hidden');
+                testResults.passed++;
+                testResults.details['canvas-support'] = { value: 'Supported', passed: true };
+            } catch (error) {
+                document.getElementById('canvas-support').textContent = 'Not Supported';
+                document.getElementById('canvas-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['canvas-support'] = { value: 'Not Supported', passed: false };
+            }
+            testResults.total++;
+
+            // WebGL Test
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                const supported = !!gl;
+                
+                document.getElementById('webgl-support').textContent = supported ? 'Supported' : 'Not Supported';
+                document.getElementById('webgl-test').classList.toggle('pass', supported);
+                document.getElementById('webgl-test').classList.toggle('fail', !supported);
+                
+                if (supported) testResults.passed++;
+                else testResults.failed++;
+                testResults.details['webgl-support'] = { value: supported ? 'Supported' : 'Not Supported', passed: supported };
+            } catch (error) {
+                document.getElementById('webgl-support').textContent = 'Error: ' + error.message;
+                document.getElementById('webgl-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['webgl-support'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // WebGL2 Test
+            try {
+                const canvas = document.createElement('canvas');
+                const gl2 = canvas.getContext('webgl2');
+                const supported = !!gl2;
+                
+                document.getElementById('webgl2-support').textContent = supported ? 'Supported' : 'Not Supported';
+                document.getElementById('webgl2-test').classList.toggle('pass', supported);
+                document.getElementById('webgl2-test').classList.toggle('fail', !supported);
+                
+                if (supported) testResults.passed++;
+                else testResults.failed++;
+                testResults.details['webgl2-support'] = { value: supported ? 'Supported' : 'Not Supported', passed: supported };
+            } catch (error) {
+                document.getElementById('webgl2-support').textContent = 'Error: ' + error.message;
+                document.getElementById('webgl2-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['webgl2-support'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // CSS Filters Test
+            const cssFiltersSupported = CSS.supports('filter', 'blur(1px)');
+            document.getElementById('css-filters-support').textContent = cssFiltersSupported ? 'Supported' : 'Not Supported';
+            document.getElementById('css-filters-test').classList.toggle('pass', cssFiltersSupported);
+            document.getElementById('css-filters-test').classList.toggle('fail', !cssFiltersSupported);
+            
+            if (cssFiltersSupported) testResults.passed++;
+            else testResults.failed++;
+            testResults.details['css-filters-support'] = { value: cssFiltersSupported ? 'Supported' : 'Not Supported', passed: cssFiltersSupported };
+            testResults.total++;
+
+            updateSectionStatus('rendering-status', testResults.passed > testResults.failed);
+        }
+
+        // Modern Web Standards Tests
+        function testWebStandards() {
+            const standards = [
+                { id: 'https-test', check: () => location.protocol === 'https:', name: 'HTTPS' },
+                { id: 'cors-test', check: () => 'fetch' in window, name: 'CORS' },
+                { id: 'csp-test', check: () => document.querySelector('meta[http-equiv="Content-Security-Policy"]') !== null, name: 'CSP' },
+                { id: 'service-worker-test', check: () => 'serviceWorker' in navigator, name: 'Service Worker' },
+                { id: 'webp-test', check: () => document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') === 0, name: 'WebP' },
+                { id: 'avif-test', check: () => document.createElement('canvas').toDataURL('image/avif').indexOf('data:image/avif') === 0, name: 'AVIF' },
+                { id: 'webauthn-test', check: () => 'credentials' in navigator, name: 'WebAuthn' },
+                { id: 'permissions-test', check: () => 'permissions' in navigator, name: 'Permissions API' }
+            ];
+
+            standards.forEach(standard => {
+                try {
+                    const result = standard.check();
+                    const element = document.getElementById(standard.id);
+                    const resultElement = document.getElementById(standard.id.replace('-test', '-result'));
+                    
+                    resultElement.textContent = result ? 'Supported' : 'Not Supported';
+                    element.classList.toggle('pass', result);
+                    element.classList.toggle('fail', !result);
+                    
+                    if (result) testResults.passed++;
+                    else testResults.failed++;
+                    testResults.details[standard.id] = { value: result ? 'Supported' : 'Not Supported', passed: result };
+                } catch (error) {
+                    const element = document.getElementById(standard.id);
+                    const resultElement = document.getElementById(standard.id.replace('-test', '-result'));
+                    
+                    resultElement.textContent = 'Error: ' + error.message;
+                    element.classList.add('fail');
+                    testResults.failed++;
+                    testResults.details[standard.id] = { value: 'Error', passed: false };
+                }
+                testResults.total++;
+            });
+
+            updateSectionStatus('standards-status', testResults.passed > testResults.failed);
+        }
+
+        // Anti-Fingerprinting Detection
+        function testAntiFingerprinting() {
+            // Screen Size Consistency Test
+            try {
+                const screenWidth = screen.width;
+                const screenHeight = screen.height;
+                const availWidth = screen.availWidth;
+                const availHeight = screen.availHeight;
+                
+                // Check if screen dimensions match common anti-fingerprinting patterns
+                const commonSizes = [
+                    [360, 780], [384, 854], [412, 892], [412, 915], [720, 1680], [1600, 2560]
+                ];
+                
+                const isCommonSize = commonSizes.some(size => 
+                    size[0] === screenWidth && size[1] === screenHeight
+                );
+                
+                const isConsistent = screenWidth >= availWidth && screenHeight >= availHeight;
+                const result = isConsistent ? (isCommonSize ? 'Anti-fingerprinting detected' : 'Consistent') : 'Inconsistent';
+                
+                document.getElementById('fingerprint-consistency').textContent = result;
+                document.getElementById('fingerprint-consistency-test').classList.toggle('pass', isConsistent);
+                document.getElementById('fingerprint-consistency-test').classList.toggle('fail', !isConsistent);
+                
+                if (isConsistent) testResults.passed++;
+                else testResults.failed++;
+                testResults.details['fingerprint-consistency'] = { value: result, passed: isConsistent };
+            } catch (error) {
+                document.getElementById('fingerprint-consistency').textContent = 'Error: ' + error.message;
+                document.getElementById('fingerprint-consistency-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['fingerprint-consistency'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Screen Fingerprint Uniqueness Test
+            try {
+                const screenWidth = screen.width;
+                const screenHeight = screen.height;
+                const colorDepth = screen.colorDepth;
+                const pixelDepth = screen.pixelDepth;
+                const dpr = window.devicePixelRatio;
+                
+                // Create a fingerprint string from screen properties
+                const fingerprint = `${screenWidth}x${screenHeight}x${colorDepth}x${pixelDepth}x${dpr}`;
+                
+                // Calculate uniqueness score (higher = more unique)
+                const commonResolutions = [
+                    '1920x1080', '1366x768', '1536x864', '1440x900', '1280x720',
+                    '1600x900', '2560x1440', '1920x1200', '3840x2160', '1360x768'
+                ];
+                
+                const resolution = `${screenWidth}x${screenHeight}`;
+                const isCommonResolution = commonResolutions.includes(resolution);
+                const uniquenessScore = isCommonResolution ? 'Low' : 'High';
+                
+                const result = `${fingerprint} (Uniqueness: ${uniquenessScore})`;
+                
+                document.getElementById('fingerprint-uniqueness').textContent = result;
+                document.getElementById('fingerprint-uniqueness-test').classList.add('pass');
+                testResults.passed++;
+                testResults.details['fingerprint-uniqueness'] = { value: result, passed: true };
+            } catch (error) {
+                document.getElementById('fingerprint-uniqueness').textContent = 'Error: ' + error.message;
+                document.getElementById('fingerprint-uniqueness-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['fingerprint-uniqueness'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Screen Entropy Analysis Test
+            try {
+                const screenWidth = screen.width;
+                const screenHeight = screen.height;
+                const availWidth = screen.availWidth;
+                const availHeight = screen.availHeight;
+                const colorDepth = screen.colorDepth;
+                const dpr = window.devicePixelRatio;
+                
+                // Calculate entropy based on the number of possible combinations
+                const widthEntropy = Math.log2(screenWidth + 1);
+                const heightEntropy = Math.log2(screenHeight + 1);
+                const colorEntropy = Math.log2(colorDepth + 1);
+                const dprEntropy = Math.log2(dpr * 100 + 1);
+                
+                const totalEntropy = (widthEntropy + heightEntropy + colorEntropy + dprEntropy).toFixed(2);
+                const entropyLevel = totalEntropy > 20 ? 'High' : totalEntropy > 15 ? 'Medium' : 'Low';
+                
+                const result = `${totalEntropy} bits (${entropyLevel} entropy)`;
+                
+                document.getElementById('fingerprint-entropy').textContent = result;
+                document.getElementById('fingerprint-entropy-test').classList.add('pass');
+                testResults.passed++;
+                testResults.details['fingerprint-entropy'] = { value: result, passed: true };
+            } catch (error) {
+                document.getElementById('fingerprint-entropy').textContent = 'Error: ' + error.message;
+                document.getElementById('fingerprint-entropy-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['fingerprint-entropy'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Screen Rotation Detection Test
+            try {
+                const screenWidth = screen.width;
+                const screenHeight = screen.height;
+                const innerWidth = window.innerWidth;
+                const innerHeight = window.innerHeight;
+                
+                // Detect if screen is rotated
+                const isLandscape = screenWidth > screenHeight;
+                const isWindowLandscape = innerWidth > innerHeight;
+                const rotationMatches = isLandscape === isWindowLandscape;
+                
+                // Check for common mobile resolutions in portrait vs landscape
+                const mobilePortraitResolutions = [
+                    [360, 640], [375, 667], [375, 812], [414, 736], [414, 896],
+                    [360, 780], [384, 854], [412, 892], [412, 915]
+                ];
+                
+                const isMobilePortrait = mobilePortraitResolutions.some(res => 
+                    (res[0] === screenWidth && res[1] === screenHeight) ||
+                    (res[1] === screenWidth && res[0] === screenHeight)
+                );
+                
+                const rotationStatus = rotationMatches ? 'Consistent' : 'Inconsistent';
+                const deviceType = isMobilePortrait ? 'Mobile' : 'Desktop';
+                const result = `${rotationStatus} (${deviceType})`;
+                
+                document.getElementById('fingerprint-rotation').textContent = result;
+                document.getElementById('fingerprint-rotation-test').classList.toggle('pass', rotationMatches);
+                document.getElementById('fingerprint-rotation-test').classList.toggle('fail', !rotationMatches);
+                
+                if (rotationMatches) testResults.passed++;
+                else testResults.failed++;
+                testResults.details['fingerprint-rotation'] = { value: result, passed: rotationMatches };
+            } catch (error) {
+                document.getElementById('fingerprint-rotation').textContent = 'Error: ' + error.message;
+                document.getElementById('fingerprint-rotation-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['fingerprint-rotation'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Device Pixel Ratio Analysis Test
+            try {
+                const dpr = window.devicePixelRatio;
+                const screenWidth = screen.width;
+                const screenHeight = screen.height;
+                
+                // Common DPR values and their typical use cases
+                const commonDPRs = {
+                    1: 'Standard Display',
+                    1.25: 'Some Windows Displays',
+                    1.5: 'Some High-DPI Displays',
+                    2: 'Retina/High-DPI Mobile',
+                    2.5: 'Some High-End Mobile',
+                    3: 'Super Retina/High-End Mobile',
+                    3.5: 'Some Ultra High-End Mobile',
+                    4: 'Some Ultra High-End Displays'
+                };
+                
+                const dprCategory = commonDPRs[dpr] || 'Unusual DPR';
+                const isStandardDPR = Object.keys(commonDPRs).includes(dpr.toString());
+                
+                // Check for potential anti-fingerprinting (DPR rounding)
+                const isRoundedDPR = dpr === Math.round(dpr);
+                const antiFingerprintingRisk = !isStandardDPR || !isRoundedDPR ? 'High' : 'Low';
+                
+                const result = `${dpr} (${dprCategory}) - Anti-FP Risk: ${antiFingerprintingRisk}`;
+                
+                document.getElementById('fingerprint-dpr').textContent = result;
+                document.getElementById('fingerprint-dpr-test').classList.add('pass');
+                testResults.passed++;
+                testResults.details['fingerprint-dpr'] = { value: result, passed: true };
+            } catch (error) {
+                document.getElementById('fingerprint-dpr').textContent = 'Error: ' + error.message;
+                document.getElementById('fingerprint-dpr-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['fingerprint-dpr'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Color Depth Fingerprint Test
+            try {
+                const colorDepth = screen.colorDepth;
+                const pixelDepth = screen.pixelDepth;
+                
+                // Common color depths and their implications
+                const colorDepthInfo = {
+                    8: '256 colors (Very old)',
+                    16: '65K colors (Old)',
+                    24: '16M colors (Standard)',
+                    32: '16M colors + alpha (Standard)',
+                    48: '281 trillion colors (Professional)'
+                };
+                
+                const depthCategory = colorDepthInfo[colorDepth] || 'Unusual depth';
+                const isStandardDepth = [24, 32].includes(colorDepth);
+                const depthsMatch = colorDepth === pixelDepth;
+                
+                // Check for potential anti-fingerprinting
+                const antiFingerprintingRisk = !isStandardDepth || !depthsMatch ? 'Medium' : 'Low';
+                
+                const result = `${colorDepth}-bit (${depthCategory}) - Anti-FP Risk: ${antiFingerprintingRisk}`;
+                
+                document.getElementById('fingerprint-color').textContent = result;
+                document.getElementById('fingerprint-color-test').classList.toggle('pass', depthsMatch);
+                document.getElementById('fingerprint-color-test').classList.toggle('fail', !depthsMatch);
+                
+                if (depthsMatch) testResults.passed++;
+                else testResults.failed++;
+                testResults.details['fingerprint-color'] = { value: result, passed: depthsMatch };
+            } catch (error) {
+                document.getElementById('fingerprint-color').textContent = 'Error: ' + error.message;
+                document.getElementById('fingerprint-color-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['fingerprint-color'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Timezone Test
+            try {
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                document.getElementById('timezone-result').textContent = timezone;
+                document.getElementById('timezone-test').classList.add('pass');
+                testResults.passed++;
+                testResults.details['timezone'] = { value: timezone, passed: true };
+            } catch (error) {
+                document.getElementById('timezone-result').textContent = 'Error: ' + error.message;
+                document.getElementById('timezone-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['timezone'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Language Test
+            try {
+                const language = navigator.language;
+                document.getElementById('language-result').textContent = language;
+                document.getElementById('language-test').classList.add('pass');
+                testResults.passed++;
+                testResults.details['language'] = { value: language, passed: true };
+            } catch (error) {
+                document.getElementById('language-result').textContent = 'Error: ' + error.message;
+                document.getElementById('language-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['language'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            // Platform Test
+            try {
+                const platform = navigator.platform;
+                document.getElementById('platform-result').textContent = platform;
+                document.getElementById('platform-test').classList.add('pass');
+                testResults.passed++;
+                testResults.details['platform'] = { value: platform, passed: true };
+            } catch (error) {
+                document.getElementById('platform-result').textContent = 'Error: ' + error.message;
+                document.getElementById('platform-test').classList.add('fail');
+                testResults.failed++;
+                testResults.details['platform'] = { value: 'Error', passed: false };
+            }
+            testResults.total++;
+
+            updateSectionStatus('fingerprint-status', testResults.passed > testResults.failed);
+        }
+
+        function updateSectionStatus(statusId, passed) {
+            const element = document.getElementById(statusId);
+            element.classList.remove('status-pending');
+            element.classList.add(passed ? 'status-pass' : 'status-fail');
+        }
+
+        function updateSummary() {
+            document.getElementById('total-tests').textContent = testResults.total;
+            document.getElementById('passed-tests').textContent = testResults.passed;
+            document.getElementById('failed-tests').textContent = testResults.failed;
+            
+            const overallStatus = testResults.passed > testResults.failed ? '✅ PASS' : '❌ FAIL';
+            document.getElementById('overall-status').textContent = overallStatus;
+        }
+
+        function runAllTests() {
+            // Reset results
+            testResults = { total: 0, passed: 0, failed: 0, details: {} };
+            
+            // Reset UI
+            document.querySelectorAll('.test-item').forEach(item => {
+                item.classList.remove('pass', 'fail');
+            });
+            document.querySelectorAll('.status-indicator').forEach(indicator => {
+                indicator.classList.remove('status-pass', 'status-fail');
+                indicator.classList.add('status-pending');
+            });
+            document.querySelectorAll('.filter-test').forEach(test => {
+                test.classList.remove('pass', 'fail');
+            });
+            
+            // Run tests with delays for better UX
+            setTimeout(testScreenDimensions, 100);
+            setTimeout(testWindowDimensions, 300);
+            setTimeout(testRenderingCapabilities, 500);
+            setTimeout(testWebStandards, 700);
+            setTimeout(testAntiFingerprinting, 900);
+            setTimeout(updateSummary, 1100);
+        }
+
+        function exportResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                summary: {
+                    total: testResults.total,
+                    passed: testResults.passed,
+                    failed: testResults.failed,
+                    passRate: ((testResults.passed / testResults.total) * 100).toFixed(2) + '%'
+                },
+                details: testResults.details,
+                screenInfo: {
+                    width: screen.width,
+                    height: screen.height,
+                    availWidth: screen.availWidth,
+                    availHeight: screen.availHeight,
+                    colorDepth: screen.colorDepth,
+                    pixelDepth: screen.pixelDepth
+                },
+                windowInfo: {
+                    innerWidth: window.innerWidth,
+                    innerHeight: window.innerHeight,
+                    outerWidth: window.outerWidth,
+                    outerHeight: window.outerHeight,
+                    devicePixelRatio: window.devicePixelRatio
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `screen-test-results-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 500);
+        });
+
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                testWindowDimensions();
+                updateSummary();
+            }, 250);
+        });
+    </script>
+</body>
+</html>
